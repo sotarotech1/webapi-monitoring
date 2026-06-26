@@ -1,0 +1,95 @@
+<div class="max-w-6xl">
+
+  <!-- Header -->
+  <div class="flex items-start justify-between mb-6">
+    <div>
+      <h2 class="text-xl font-bold text-gray-800">Monitored Sites</h2>
+      <p class="text-sm text-gray-500 mt-1">Manage and monitor your websites</p>
+    </div>
+    <button class="btn btn-primary btn-sm" (click)="openForm()">
+      <i class="fas fa-plus"></i> Add Site
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-24">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+  } @else if (sites().length === 0) {
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body items-center py-20">
+        <i class="fas fa-globe text-6xl text-base-300 mb-4"></i>
+        <p class="text-gray-500 mb-4">No sites added yet.</p>
+        <button class="btn btn-primary" (click)="openForm()">Add your first site</button>
+      </div>
+    </div>
+  } @else {
+    <div class="card bg-base-100 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr class="bg-base-200 text-xs uppercase text-gray-500">
+              <th>Status</th>
+              <th>Name</th>
+              <th>URL</th>
+              <th>Interval</th>
+              <th>Last Check</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (site of sites(); track site.id) {
+              <tr class="hover cursor-pointer" [routerLink]="['/sites', site.id]">
+                <td><app-status-badge [status]="site.status" /></td>
+                <td class="font-semibold text-gray-800">{{ site.name }}</td>
+                <td class="text-gray-400 text-sm max-w-[200px] truncate">{{ site.url }}</td>
+                <td class="text-sm text-gray-500">{{ site.check_interval_minutes }} min</td>
+                <td class="text-sm text-gray-500">
+                  {{ site.last_checked_at ? (site.last_checked_at | date:'short') : '—' }}
+                </td>
+                <td>
+                  <div class="flex items-center gap-1 justify-end">
+                    <button class="btn btn-ghost btn-xs btn-circle"
+                            title="Check now"
+                            [disabled]="checkingIds().has(site.id)"
+                            (click)="checkNow(site, $event)">
+                      @if (checkingIds().has(site.id)) {
+                        <span class="loading loading-spinner loading-xs"></span>
+                      } @else {
+                        <i class="fas fa-rotate text-gray-500"></i>
+                      }
+                    </button>
+                    <button class="btn btn-ghost btn-xs btn-circle"
+                            title="Edit"
+                            (click)="openForm(site); $event.stopPropagation()">
+                      <i class="fas fa-pen text-gray-500"></i>
+                    </button>
+                    <button class="btn btn-ghost btn-xs btn-circle"
+                            title="Delete"
+                            (click)="deleteSite(site, $event)">
+                      <i class="fas fa-trash-can text-red-400"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- Form Dialog (native HTML dialog) -->
+<dialog #formDialog class="modal">
+  <div class="modal-box w-full max-w-md">
+    <app-site-form-dialog
+      [site]="editingSite()"
+      (saved)="onSaved()"
+      (cancelled)="onCancelled()" />
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button (click)="onCancelled()">close</button>
+  </form>
+</dialog>

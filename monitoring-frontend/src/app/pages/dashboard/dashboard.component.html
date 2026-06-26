@@ -1,0 +1,89 @@
+<div class="max-w-6xl">
+
+  <!-- Header -->
+  <div class="flex items-start justify-between mb-6">
+    <div>
+      <h2 class="text-xl font-bold text-gray-800">Overview</h2>
+      <p class="text-sm text-gray-500 mt-1">Real-time status of your monitored sites</p>
+    </div>
+    <a routerLink="/sites" class="btn btn-primary btn-sm">
+      <i class="fas fa-plus"></i> Add Site
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center items-center py-24">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+  } @else {
+
+    <!-- Stats Grid -->
+    @if (stats(); as s) {
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <app-stat-card
+          label="Total Sites"
+          [value]="s.total_sites"
+          icon="fa-globe"
+          iconClass="text-blue-600 bg-blue-50" />
+        <app-stat-card
+          label="Online"
+          [value]="s.sites_up"
+          icon="fa-circle-check"
+          iconClass="text-green-600 bg-green-50" />
+        <app-stat-card
+          label="Offline"
+          [value]="s.sites_down"
+          icon="fa-circle-xmark"
+          iconClass="text-red-600 bg-red-50" />
+        <app-stat-card
+          [label]="'Uptime'"
+          [value]="s.uptime_percent !== null ? s.uptime_percent + '%' : 'N/A'"
+          icon="fa-chart-line"
+          iconClass="text-orange-600 bg-orange-50" />
+      </div>
+    }
+
+    <!-- Sites Section -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-gray-700">Sites</h3>
+        <a routerLink="/sites" class="text-sm text-primary font-medium hover:underline flex items-center gap-1">
+          View all <i class="fas fa-arrow-right text-xs"></i>
+        </a>
+      </div>
+
+      @if (sites().length === 0) {
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body items-center py-16">
+            <i class="fas fa-globe text-5xl text-base-300 mb-4"></i>
+            <p class="text-gray-500">No sites yet.</p>
+            <a routerLink="/sites" class="btn btn-primary btn-sm mt-2">Add your first site</a>
+          </div>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          @for (site of sites(); track site.id) {
+            <a class="card bg-base-100 shadow-sm hover:shadow-md transition-all cursor-pointer"
+               [routerLink]="['/sites', site.id]">
+              <div class="card-body p-4">
+                <div class="flex items-start justify-between mb-2">
+                  <span class="font-semibold text-gray-800 truncate mr-2">{{ site.name }}</span>
+                  <app-status-badge [status]="site.status" />
+                </div>
+                <p class="text-xs text-gray-400 truncate mb-3">{{ site.url }}</p>
+                <div class="flex items-center gap-4 text-xs text-gray-400">
+                  <span><i class="fas fa-clock mr-1"></i>{{ site.check_interval_minutes }} min</span>
+                  <span>
+                    <i class="fas fa-clock-rotate-left mr-1"></i>
+                    {{ site.last_checked_at ? (site.last_checked_at | date:'shortTime') : 'Never' }}
+                  </span>
+                </div>
+              </div>
+            </a>
+          }
+        </div>
+      }
+    </div>
+
+  }
+</div>
