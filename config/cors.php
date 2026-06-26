@@ -18,7 +18,12 @@ return [
 
     "allowed_methods" => ["*"],
 
-    "allowed_origins" => ["http://localhost:4200"],
+    "allowed_origins" => array_filter(
+        array_map(
+            "trim",
+            explode(",", env("CORS_ALLOWED_ORIGINS", "http://localhost:4200")),
+        ),
+    ),
 
     "allowed_origins_patterns" => [],
 
@@ -26,7 +31,9 @@ return [
 
     "exposed_headers" => [],
 
-    "max_age" => 0,
+    "max_age" => 86400,
 
-    "supports_credentials" => true,
+    // Bearer token auth does not use cookies, so credentials are not needed.
+    // Keep false to allow wildcard-style origin lists without browser restrictions.
+    "supports_credentials" => false,
 ];

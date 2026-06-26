@@ -21,7 +21,7 @@ export class EchoService {
       wssPort: environment.reverb.port,
       forceTLS: environment.reverb.scheme === 'https',
       enabledTransports: ['ws', 'wss'],
-      authEndpoint: 'http://localhost:8000/broadcasting/auth',
+      authEndpoint: `${environment.apiUrl.replace('/api', '')}/broadcasting/auth`,
       auth: {
         headers: {
           Authorization: `Bearer ${this.authService.token()}`,
